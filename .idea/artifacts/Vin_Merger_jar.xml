@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Vin Merger:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Vin_Merger_jar</output-path>
+    <root id="archive" name="Vin Merger.jar">
+      <element id="module-output" name="Vin Merger" />
+    </root>
+  </artifact>
+</component>
