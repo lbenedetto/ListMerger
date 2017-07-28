@@ -17,7 +17,12 @@ public class Vehicle {
 
 	private static void addVehicle(String data) {
 		String[] datum = data.split(",");
-		Vehicle v = new Vehicle(datum[0], datum[1], datum[2], datum[3]);
+		Vehicle v;
+		if (datum.length == 4)
+			v = new Vehicle(datum[0], datum[1], datum[2], datum[3]);
+		else
+			//The formatting of the file is broken, but we can't risk losing any data
+			v = new Vehicle(data, "", "", "");
 		vehicles.add(v);
 	}
 

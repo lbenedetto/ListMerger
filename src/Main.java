@@ -6,10 +6,12 @@ public class Main {
 		dialog.setTitle("VIN List Merger");
 		dialog.pack();
 		dialog.setVisible(true);
+		System.out.println("Exiting...");
 		System.exit(0);
 	}
 
 	static void showError(String s) {
+		System.out.println(s);
 		JDialog d = new Error(s);
 		d.pack();
 		d.setVisible(true);
