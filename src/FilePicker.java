@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -35,11 +36,21 @@ public class FilePicker extends JDialog {
 		buttonOpenFile.addActionListener(e -> pickFiles());
 	}
 
+	private File getStartDir() {
+		File file = new File("\\\\vip-fs1\\Users");
+		FileSystemView fsv = FileSystemView.getFileSystemView();
+		file = fsv.getParentDirectory(file);
+		file = fsv.getChild(file, "Users");
+		file = fsv.getChild(file, "vipemp");
+		file = fsv.getChild(file, "Filing");
+		return file;
+	}
+
 	private void pickFiles() {
-		JFileChooser picker = new JFileChooser("\\\\vip-fs1\\Users\\Filing");
+		JFileChooser picker = new JFileChooser(getStartDir());
 		picker.setDialogTitle("Choose files to merge");
 		picker.setMultiSelectionEnabled(true);
-		picker.setFileFilter(new FileNameExtensionFilter("csv files (*.csv)", "csv"));
+		picker.setFileFilter(new FileNameExtensionFilter("text files (*.txt)", "txt"));
 		picker.showOpenDialog(this);
 		files = picker.getSelectedFiles();
 		if (files.length < 2) Main.showError("Must select at least 2 files");
@@ -53,7 +64,7 @@ public class FilePicker extends JDialog {
 	private void onMerge() {
 		if (files.length < 2) Main.showError("Must select at least 2 files");
 		HashSet<Vehicle> vehicles = Vehicle.merge(files);
-		JFileChooser picker = new JFileChooser("\\\\vip-fs1\\Users\\Filing");
+		JFileChooser picker = new JFileChooser(getStartDir());
 		picker.setDialogTitle("Choose output file");
 		picker.setMultiSelectionEnabled(false);
 		picker.setFileFilter(new FileNameExtensionFilter("csv files (*.csv)", "csv"));
