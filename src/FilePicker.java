@@ -36,7 +36,7 @@ public class FilePicker extends JDialog {
 	}
 
 	private void pickFiles() {
-		JFileChooser picker = new JFileChooser();
+		JFileChooser picker = new JFileChooser("\\\\vip-fs1\\Users\\Filing");
 		picker.setDialogTitle("Choose files to merge");
 		picker.setMultiSelectionEnabled(true);
 		picker.setFileFilter(new FileNameExtensionFilter("csv files (*.csv)", "csv"));
@@ -53,7 +53,7 @@ public class FilePicker extends JDialog {
 	private void onMerge() {
 		if (files.length < 2) Main.showError("Must select at least 2 files");
 		HashSet<Vehicle> vehicles = Vehicle.merge(files);
-		JFileChooser picker = new JFileChooser();
+		JFileChooser picker = new JFileChooser("\\\\vip-fs1\\Users\\Filing");
 		picker.setDialogTitle("Choose output file");
 		picker.setMultiSelectionEnabled(false);
 		picker.setFileFilter(new FileNameExtensionFilter("csv files (*.csv)", "csv"));

@@ -9,10 +9,10 @@ public class Vehicle {
 	private String VIN, StockNumber, EntryDate, Owner;
 
 	private Vehicle(String VIN, String stockNumber, String entryDate, String owner) {
-		this.VIN = VIN;
-		StockNumber = stockNumber;
+		this.VIN = VIN.toUpperCase();
+		StockNumber = stockNumber.toUpperCase();
 		EntryDate = entryDate;
-		Owner = owner;
+		Owner = owner.toUpperCase();
 	}
 
 	private static void addVehicle(String data) {
