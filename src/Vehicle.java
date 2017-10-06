@@ -17,6 +17,7 @@ public class Vehicle {
 
 	private static void addVehicle(String data) {
 		String[] datum = data.split(",");
+		if (datum[0].equals("\"VIN NUMBER\"")) return;
 		Vehicle v;
 		if (datum.length == 4)
 			v = new Vehicle(datum[0], datum[1], datum[2], datum[3]);

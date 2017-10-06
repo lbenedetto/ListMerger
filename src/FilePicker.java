@@ -67,9 +67,9 @@ public class FilePicker extends JDialog {
 		JFileChooser picker = new JFileChooser(getStartDir());
 		picker.setDialogTitle("Choose output file");
 		picker.setMultiSelectionEnabled(false);
-		picker.setFileFilter(new FileNameExtensionFilter("csv files (*.csv)", "csv"));
+		picker.setFileFilter(new FileNameExtensionFilter("text files (*.txt)", "txt"));
 		picker.showOpenDialog(this);
-		try (FileWriter fw = new FileWriter(picker.getSelectedFile() + ".csv")) {
+		try (FileWriter fw = new FileWriter(picker.getSelectedFile())) {
 			StringBuilder s = new StringBuilder();
 			for (Vehicle v : vehicles)
 				s.append(v.toString());
