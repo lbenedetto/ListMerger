@@ -36,23 +36,9 @@ public class FilePicker extends JDialog {
 		buttonOpenFile.addActionListener(e -> pickFiles());
 	}
 
-	private File getStartDir() {
-		File file = new File("\\\\vip-fs1\\Users");
-		FileSystemView fsv = FileSystemView.getFileSystemView();
-		file = fsv.getParentDirectory(file);
-		file = fsv.getChild(file, "Users");
-		file = fsv.getChild(file, "vipemp");
-		file = fsv.getChild(file, "Filing");
-		return file;
-	}
 
 	private void pickFiles() {
-		JFileChooser picker = new JFileChooser(getStartDir());
-		picker.setDialogTitle("Choose files to merge");
-		picker.setMultiSelectionEnabled(true);
-		picker.setFileFilter(new FileNameExtensionFilter("text files (*.txt)", "txt"));
-		picker.showOpenDialog(this);
-		files = picker.getSelectedFiles();
+		files = pickFile("Choose files to merge");
 		if (files.length < 2) Main.showError("Must select at least 2 files");
 		StringBuilder s = new StringBuilder();
 		for (File f : files) {
@@ -64,12 +50,9 @@ public class FilePicker extends JDialog {
 	private void onMerge() {
 		if (files.length < 2) Main.showError("Must select at least 2 files");
 		HashSet<Vehicle> vehicles = Vehicle.merge(files);
-		JFileChooser picker = new JFileChooser(getStartDir());
-		picker.setDialogTitle("Choose output file");
-		picker.setMultiSelectionEnabled(false);
-		picker.setFileFilter(new FileNameExtensionFilter("text files (*.txt)", "txt"));
-		picker.showOpenDialog(this);
-		try (FileWriter fw = new FileWriter(picker.getSelectedFile())) {
+		File outfile = pickFile("Choose output file")[0];
+		//Write the vehicles to the output file
+		try (FileWriter fw = new FileWriter(outfile)) {
 			StringBuilder s = new StringBuilder();
 			for (Vehicle v : vehicles)
 				s.append(v.toString());
@@ -78,6 +61,23 @@ public class FilePicker extends JDialog {
 			Main.showError(e.getMessage());
 		}
 		dispose();
+	}
+
+	private File[] pickFile(String title) {
+		//Get start dir
+		File dir = new File("\\\\vip-fs1\\Users");
+		FileSystemView fsv = FileSystemView.getFileSystemView();
+		dir = fsv.getParentDirectory(dir);
+		dir = fsv.getChild(dir, "Users");
+		dir = fsv.getChild(dir, "vipemp");
+		dir = fsv.getChild(dir, "Filing");
+
+		JFileChooser picker = new JFileChooser(dir);
+		picker.setDialogTitle(title);
+		picker.setMultiSelectionEnabled(false);
+		picker.setFileFilter(new FileNameExtensionFilter("text files (*.txt)", "txt"));
+		picker.showOpenDialog(this);
+		return picker.getSelectedFiles();
 	}
 
 	private void onCancel() {
