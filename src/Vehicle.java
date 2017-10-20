@@ -6,13 +6,13 @@ import java.util.HashSet;
 
 public class Vehicle {
 	private static HashSet<Vehicle> vehicles = new HashSet<>();
-	private String VIN, StockNumber, EntryDate, Owner;
+	private String VIN, stockNumber, entryDate, owner;
 
 	private Vehicle(String VIN, String stockNumber, String entryDate, String owner) {
 		this.VIN = VIN.toUpperCase();
-		StockNumber = stockNumber.toUpperCase();
-		EntryDate = entryDate;
-		Owner = owner.toUpperCase();
+		this.stockNumber = stockNumber.toUpperCase();
+		this.entryDate = entryDate;
+		this.owner = owner.toUpperCase();
 	}
 
 	private static void addVehicle(String data) {
@@ -39,7 +39,7 @@ public class Vehicle {
 
 	@Override
 	public String toString() {
-		return String.format("%s,%s,%s,%s\r\n", VIN, StockNumber, EntryDate, Owner);
+		return String.format("%s,%s,%s,%s\r\n", VIN, stockNumber, entryDate, owner);
 	}
 
 	@Override
@@ -49,6 +49,14 @@ public class Vehicle {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof Vehicle && this.VIN.equals((((Vehicle) obj).VIN));
+		if (obj instanceof Vehicle) {
+			Vehicle v = (Vehicle) obj;
+			return this.VIN.equals(v.VIN) &&
+					this.stockNumber.equals(v.stockNumber) &&
+					this.entryDate.equals(v.entryDate) &&
+					this.owner.equals(v.owner);
+		}
+		return false;
+
 	}
 }
