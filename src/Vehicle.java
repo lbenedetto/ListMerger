@@ -7,48 +7,46 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 
-public class Vehicle {
+public class Vehicle implements Comparable<Vehicle> {
 	private static HashSet<Vehicle> vehicles = new HashSet<>();
-	private String VIN, stockNumber, entryDate, owner;
+	private String VIN, entryDate, owner;
 	private static final ArrayList<String> errors = new ArrayList<>();
 
-	private Vehicle(String VIN, String stockNumber, String entryDate, String owner) {
+	private Vehicle(String VIN, String entryDate, String owner) {
 		this.VIN = VIN.toUpperCase();
-		this.stockNumber = stockNumber;
 		this.entryDate = entryDate;
 		this.owner = owner.toUpperCase();
 	}
 
 	private static void addVehicle(String data) {
 		data = simplify(data);
+		verifyData(data);
 		String[] datum = data.split(",");
 		if (datum[0].equals("VIN NUMBER")) return;
-		verifyData(data);
 		Vehicle v;
-		if (datum.length == 4) {
-			if (datum[0].length() <= 8)
-				v = new Vehicle(datum[0], datum[0], datum[2], datum[3]);
-			else
-				v = new Vehicle(datum[0], last8(datum[0]), datum[2], datum[3]);
+		if (datum.length == 3) {
+			v = new Vehicle(datum[0], datum[1], datum[2]);
 		} else
 			//The formatting of the file is broken, but we can't risk losing any data
-			v = new Vehicle(data, "", "", "");
+			v = new Vehicle(data, "", "");
 		vehicles.add(v);
 	}
 
-	static HashSet<Vehicle> merge(File... files) {
+	static Vehicle[] merge(File... files) {
 		try {
 			for (File file : files)
 				new BufferedReader(new FileReader(file)).lines().forEach(Vehicle::addVehicle);
 		} catch (FileNotFoundException e) {
 			Main.showError(e.getMessage());
 		}
-		return Vehicle.vehicles;
+		Vehicle[] v = Vehicle.vehicles.toArray(new Vehicle[vehicles.size()]);
+		Arrays.sort(v);
+		return v;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("%s,%s,%s,%s\r\n", VIN, stockNumber, entryDate, owner);
+		return String.format("%-17s,\t%-10s,\t%s\r\n", VIN, entryDate, owner);
 	}
 
 	@Override
@@ -98,7 +96,12 @@ public class Vehicle {
 	}
 
 	private static String simplify(String s) {
-		return s.replace("\"", "").toUpperCase();
+		return s
+				.replace("\"", "")
+				.toUpperCase()
+				.replaceAll("BILL BUNCH CHEVROLET, INC", "BILL BUNCH CHEVROLET")
+				.replaceAll("\t", "")
+				.trim();
 	}
 
 	private static void addError(String s, String[] data) {
@@ -107,10 +110,6 @@ public class Vehicle {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	private static String last8(String s) {
-		return s.substring(s.length() - 8, s.length());
 	}
 
 	static void exportErrors() {
@@ -123,5 +122,32 @@ public class Vehicle {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public int compareTo(Vehicle o) {
+		if (entryDate.equals(o.entryDate)) {
+			if (owner.equals(o.owner)) {
+				return VIN.compareTo(o.VIN);
+			}
+			return owner.compareTo(o.owner);
+		}
+		return compareDateString(entryDate, o.entryDate);
+	}
+
+	private int compareDateString(String s1, String s2) {
+		int[] is1 = Arrays.stream(s1.split("/")).mapToInt(Integer::parseInt).toArray();
+		int[] is2 = Arrays.stream(s2.split("/")).mapToInt(Integer::parseInt).toArray();
+		if (is1.length == 3 && is2.length == 3) {
+			int year = is1[2] - is2[2];
+			if (year == 0) {
+				int month = is1[0] - is2[0];
+				if (month == 0)
+					return is1[1] - is2[1];
+				return month;
+			}
+			return year;
+		}
+		return 0;
 	}
 }

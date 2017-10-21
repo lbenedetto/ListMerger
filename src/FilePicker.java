@@ -49,7 +49,7 @@ public class FilePicker extends JDialog {
 
 	private void onMerge() {
 		if (files.length < 2) Main.showError("Must select at least 2 files");
-		HashSet<Vehicle> vehicles = Vehicle.merge(files);
+		Vehicle[] vehicles = Vehicle.merge(files);
 		File outfile = pickFile("Choose output file", false)[0];
 		//Write the vehicles to the output file
 		try (FileWriter fw = new FileWriter(outfile)) {
