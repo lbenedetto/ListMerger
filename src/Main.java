@@ -7,6 +7,7 @@ public class Main {
 		dialog.setTitle("VIN List Merger");
 		//dialog.pack();
 		dialog.setVisible(true);
+		Vehicle.exportErrors();
 		System.out.println("Exiting...");
 		System.exit(0);
 	}

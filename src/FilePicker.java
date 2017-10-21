@@ -38,7 +38,7 @@ public class FilePicker extends JDialog {
 
 
 	private void pickFiles() {
-		files = pickFile("Choose files to merge");
+		files = pickFile("Choose files to merge", true);
 		if (files.length < 2) Main.showError("Must select at least 2 files");
 		StringBuilder s = new StringBuilder();
 		for (File f : files) {
@@ -50,7 +50,7 @@ public class FilePicker extends JDialog {
 	private void onMerge() {
 		if (files.length < 2) Main.showError("Must select at least 2 files");
 		HashSet<Vehicle> vehicles = Vehicle.merge(files);
-		File outfile = pickFile("Choose output file")[0];
+		File outfile = pickFile("Choose output file", false)[0];
 		//Write the vehicles to the output file
 		try (FileWriter fw = new FileWriter(outfile)) {
 			StringBuilder s = new StringBuilder();
@@ -63,7 +63,7 @@ public class FilePicker extends JDialog {
 		dispose();
 	}
 
-	private File[] pickFile(String title) {
+	private File[] pickFile(String title, boolean multi) {
 		//Get start dir
 		File dir = new File("\\\\vip-fs1\\Users");
 		FileSystemView fsv = FileSystemView.getFileSystemView();
@@ -74,10 +74,13 @@ public class FilePicker extends JDialog {
 
 		JFileChooser picker = new JFileChooser(dir);
 		picker.setDialogTitle(title);
-		picker.setMultiSelectionEnabled(false);
+		picker.setMultiSelectionEnabled(multi);
 		picker.setFileFilter(new FileNameExtensionFilter("text files (*.txt)", "txt"));
 		picker.showOpenDialog(this);
-		return picker.getSelectedFiles();
+		if (multi)
+			return picker.getSelectedFiles();
+		else
+			return new File[]{picker.getSelectedFile()};
 	}
 
 	private void onCancel() {
