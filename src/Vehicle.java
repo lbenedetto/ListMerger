@@ -136,18 +136,22 @@ public class Vehicle implements Comparable<Vehicle> {
 	}
 
 	private int compareDateString(String s1, String s2) {
-		int[] is1 = Arrays.stream(s1.split("/")).mapToInt(Integer::parseInt).toArray();
-		int[] is2 = Arrays.stream(s2.split("/")).mapToInt(Integer::parseInt).toArray();
-		if (is1.length == 3 && is2.length == 3) {
-			int year = is1[2] - is2[2];
-			if (year == 0) {
-				int month = is1[0] - is2[0];
-				if (month == 0)
-					return is1[1] - is2[1];
-				return month;
+		try {
+			int[] is1 = Arrays.stream(s1.split("/")).mapToInt(x -> Integer.parseInt(x.trim())).toArray();
+			int[] is2 = Arrays.stream(s2.split("/")).mapToInt(x -> Integer.parseInt(x.trim())).toArray();
+			if (is1.length == 3 && is2.length == 3) {
+				int year = is1[2] - is2[2];
+				if (year == 0) {
+					int month = is1[0] - is2[0];
+					if (month == 0)
+						return is1[1] - is2[1];
+					return month;
+				}
+				return year;
 			}
-			return year;
+		} catch (NumberFormatException e) {
+			System.out.println(s1 + ":::" + s2);
 		}
-		return 0;
+		return s1.compareTo(s2);
 	}
 }
