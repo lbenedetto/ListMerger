@@ -1,4 +1,5 @@
 import java.io.*;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -116,8 +117,13 @@ public class Vehicle implements Comparable<Vehicle> {
 		try {
 			FileWriter out = new FileWriter(new File("MergeLogErrors.txt"));
 			errors.sort(String::compareTo);
+			out.write("===========Begin Log===========\r\n");
+			String date = new SimpleDateFormat("MM.dd.yyyy").format(new Timestamp(System.currentTimeMillis()));
+			out.write("===========" + date + "===========\r\n");
+
 			for (String s : errors)
 				out.write(s);
+			out.write("===========END LOG===========\r\n");
 			out.close();
 		} catch (Exception e) {
 			e.printStackTrace();
