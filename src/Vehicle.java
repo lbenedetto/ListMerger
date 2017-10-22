@@ -21,7 +21,6 @@ public class Vehicle implements Comparable<Vehicle> {
 
 	private static void addVehicle(String data) {
 		data = simplify(data);
-		verifyData(data);
 		String[] datum = data.split(",");
 		if (datum[0].equals("VIN NUMBER")) return;
 		Vehicle v;
@@ -30,7 +29,9 @@ public class Vehicle implements Comparable<Vehicle> {
 		} else
 			//The formatting of the file is broken, but we can't risk losing any data
 			v = new Vehicle(data, "", "");
-		vehicles.add(v);
+		if (vehicles.add(v)) {
+			v.verifyData();
+		}
 	}
 
 	static Vehicle[] merge(File... files) {
@@ -59,47 +60,46 @@ public class Vehicle implements Comparable<Vehicle> {
 	public boolean equals(Object obj) {
 		if (obj instanceof Vehicle) {
 			Vehicle v = (Vehicle) obj;
-			return this.VIN.equals(v.VIN) &&
-					this.entryDate.equals(v.entryDate) &&
-					this.owner.equals(v.owner);
+			return VIN.equals(v.VIN) &&
+					equalsIgnoreUnknown(entryDate, v.entryDate) &&
+					equalsIgnoreUnknown(owner, v.owner);
 		}
 		return false;
 	}
 
-	private static void verifyData(String data) {
-		String[] datum = data.split(",");
-		if (datum[0].equals("\"VIN NUMBER\"")) return;
-		if (datum.length >= 4) {
-			String VIN = datum[0];
-			String date = datum[2];
-			String owner = datum[3];
-			if (date.contains("2015") || date.contains("2016")) return;
+	private static boolean equalsIgnoreUnknown(String s1, String s2) {
+		return s1.replace("???", "")
+				.equals(s2.replace("???", ""));
+	}
+
+	private void verifyData() {
+		String[] datum = new String[]{VIN, entryDate, owner};
+		try {
+			DateFormat df = new SimpleDateFormat("mm/dd/yyyy");
+			if (VIN.length() != 17)
+				addError("Incorrect VIN length (Expected 17, found " + VIN.length() + ")", datum);
+			if (owner.equals(""))
+				addError("Owner not specified", datum);
 			try {
-				DateFormat df = new SimpleDateFormat("mm/dd/yyyy");
-				if (VIN.length() != 17)
-					addError("Incorrect VIN length (Expected 17, found " + VIN.length() + ")", datum);
-				if (owner.equals(""))
-					addError("Owner not specified", datum);
-				try {
-					Date d = df.parse(date);
+				if (entryDate.equals("???")) {
+					Date d = df.parse(entryDate);
 					if (d.before(df.parse("1/1/2015")))
 						addError("Date is likely incorrect as it is before 2015", datum);
-				} catch (ParseException e) {
-					addError("Date is incorrectly formatted", datum);
 				}
-			} catch (ArrayIndexOutOfBoundsException e) {
-				e.printStackTrace();
-				System.out.printf("%s,%s,%s", VIN, date, owner);
+			} catch (ParseException e) {
+				addError("Date is incorrectly formatted", datum);
 			}
-		} else {
-			addError("Missing Data (most likely Owner field is empty)", datum);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			e.printStackTrace();
+			System.out.printf("%s,%s,%s", VIN, entryDate, owner);
 		}
+
 	}
 
 	private static String simplify(String s) {
 		return s
-				.replace("\"", "")
 				.toUpperCase()
+				.replace("\"", "")
 				.replaceAll("BILL BUNCH CHEVROLET, INC", "BILL BUNCH CHEVROLET")
 				.replaceAll("\t", "")
 				.trim();
