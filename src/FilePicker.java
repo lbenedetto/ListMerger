@@ -7,9 +7,8 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashSet;
 
-public class FilePicker extends JDialog {
+public class FilePicker extends JFrame {
 	private JPanel contentPane;
 	private JButton buttonMerge;
 	private JButton buttonCancel;
@@ -19,7 +18,6 @@ public class FilePicker extends JDialog {
 
 	FilePicker() {
 		setContentPane(contentPane);
-		setModal(true);
 		getRootPane().setDefaultButton(buttonMerge);
 		buttonMerge.addActionListener(e -> onMerge());
 		buttonCancel.addActionListener(e -> onCancel());
@@ -60,6 +58,7 @@ public class FilePicker extends JDialog {
 		} catch (IOException e) {
 			Main.showError(e.getMessage());
 		}
+		Vehicle.exportErrors();
 		dispose();
 	}
 

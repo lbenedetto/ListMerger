@@ -2,14 +2,10 @@ import javax.swing.*;
 
 public class Main {
 	public static void main(String[] args) {
-		FilePicker dialog = new FilePicker();
-		dialog.setSize(500,200);
-		dialog.setTitle("VIN List Merger");
-		//dialog.pack();
-		dialog.setVisible(true);
-		Vehicle.exportErrors();
-		System.out.println("Exiting...");
-		System.exit(0);
+		FilePicker window = new FilePicker();
+		window.setSize(500,200);
+		window.setTitle("VIN List Merger");
+		window.setVisible(true);
 	}
 
 	static void showError(String s) {
