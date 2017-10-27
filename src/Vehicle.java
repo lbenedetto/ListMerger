@@ -7,11 +7,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Vehicle implements Comparable<Vehicle> {
 	private static HashSet<Vehicle> vehicles = new HashSet<>();
 	private String VIN, entryDate, owner;
 	private static final ArrayList<String> errors = new ArrayList<>();
+	private static final Pattern threeComma = Pattern.compile("(^[^,]*,[^,]*,[^,]*)");
+	private static final Pattern dataPattern = Pattern.compile("(^[^,]+)?,([^,]*)?,([^,]+)?$");
 
 	private Vehicle(String VIN, String entryDate, String owner) {
 		this.VIN = VIN.toUpperCase();
@@ -26,12 +30,29 @@ public class Vehicle implements Comparable<Vehicle> {
 		Vehicle v;
 		if (datum.length == 3) {
 			v = new Vehicle(datum[0], datum[1], datum[2]);
-		} else
+		} else {
 			//The formatting of the file is broken, but we can't risk losing any data
-			v = new Vehicle(data, "", "");
+			Matcher m = dataPattern.matcher(data);
+			String vi = "???";
+			String en = "???";
+			String ow = "???";
+			if (m.find()) {
+				vi = m.group(1);
+				en = m.group(2);
+				ow = m.group(3);
+				vi = fixEmpty(vi);
+				en = fixEmpty(en);
+				ow = fixEmpty(ow);
+			}
+			v = new Vehicle(vi, en, ow);
+		}
 		if (vehicles.add(v)) {
 			v.verifyData();
 		}
+	}
+
+	private static String fixEmpty(String s) {
+		return s == null || s.isEmpty() ? "???" : s;
 	}
 
 	static Vehicle[] merge(File... files) {
@@ -68,8 +89,8 @@ public class Vehicle implements Comparable<Vehicle> {
 	}
 
 	private static boolean equalsIgnoreUnknown(String s1, String s2) {
-		return s1.replace("???", "")
-				.equals(s2.replace("???", ""));
+		return s1.trim().replace("???", "")
+				.equals(s2.trim().replace("???", ""));
 	}
 
 	private void verifyData() {
@@ -97,12 +118,15 @@ public class Vehicle implements Comparable<Vehicle> {
 	}
 
 	private static String simplify(String s) {
-		return s
-				.toUpperCase()
+		s = s.toUpperCase()
 				.replace("\"", "")
-				.replaceAll("BILL BUNCH CHEVROLET, INC", "BILL BUNCH CHEVROLET")
 				.replaceAll("\t", "")
 				.trim();
+		Matcher m = threeComma.matcher(s);
+		if (m.find()) {
+			s = m.group(1);
+		}
+		return s;
 	}
 
 	private static void addError(String s, String[] data) {
