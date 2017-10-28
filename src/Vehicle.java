@@ -18,9 +18,9 @@ public class Vehicle implements Comparable<Vehicle> {
 	private static final Pattern dataPattern = Pattern.compile("(^[^,]+)?,([^,]*)?,([^,]+)?$");
 
 	private Vehicle(String VIN, String entryDate, String owner) {
-		this.VIN = VIN.toUpperCase();
-		this.entryDate = entryDate;
-		this.owner = owner.toUpperCase();
+		this.VIN = VIN.toUpperCase().trim();
+		this.entryDate = entryDate.trim();
+		this.owner = owner.toUpperCase().trim();
 	}
 
 	private static void addVehicle(String data) {
@@ -81,16 +81,27 @@ public class Vehicle implements Comparable<Vehicle> {
 	public boolean equals(Object obj) {
 		if (obj instanceof Vehicle) {
 			Vehicle v = (Vehicle) obj;
-			return VIN.equals(v.VIN) &&
+			if (VIN.equals(v.VIN) &&
 					equalsIgnoreUnknown(entryDate, v.entryDate) &&
-					equalsIgnoreUnknown(owner, v.owner);
+					equalsIgnoreUnknown(owner, v.owner)) {
+				//Merge wildcard data
+				if (!entryDate.equals("???") ^ !v.entryDate.equals("???")) {
+					entryDate = entryDate.equals("???") ? v.entryDate : entryDate;
+					v.entryDate = v.entryDate.equals("???") ? entryDate : v.entryDate;
+				}
+				if (!owner.equals("???") ^ !v.owner.equals("???")) {
+					owner = owner.equals("???") ? v.owner : owner;
+					v.owner = v.owner.equals("???") ? owner : v.owner;
+				}
+				return true;
+			}
 		}
 		return false;
 	}
 
 	private static boolean equalsIgnoreUnknown(String s1, String s2) {
-		return s1.trim().replace("???", "")
-				.equals(s2.trim().replace("???", ""));
+		//They are the same if either one is a wildcard
+		return s1.equals("???") || s2.equals("???") || s1.equals(s2);
 	}
 
 	private void verifyData() {
