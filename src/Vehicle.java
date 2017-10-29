@@ -12,15 +12,17 @@ import java.util.regex.Pattern;
 
 public class Vehicle implements Comparable<Vehicle> {
 	private static HashSet<Vehicle> vehicles = new HashSet<>();
-	private String VIN, entryDate, owner;
+	private String VIN, entryDate, owner, notes;
 	private static final ArrayList<String> errors = new ArrayList<>();
-	private static final Pattern threeComma = Pattern.compile("(^[^,]*,[^,]*,[^,]*)");
-	private static final Pattern dataPattern = Pattern.compile("(^[^,]+)?,([^,]*)?,([^,]+)?$");
+	private static final Pattern fourComma = Pattern.compile("(^[^,]*,[^,]*,[^,]*,[^,]*)");
+	private static final Pattern dataPattern = Pattern.compile("(^[^,]+)?,([^,]*)?,([^,]*)?,([^,]*)?$");
+	private static final int FIELDS = 4;
 
-	private Vehicle(String VIN, String entryDate, String owner) {
-		this.VIN = VIN.toUpperCase().trim();
-		this.entryDate = entryDate.trim();
-		this.owner = owner.toUpperCase().trim();
+	private Vehicle(String[] datum) {
+		this.VIN = clean(datum[0]);
+		this.entryDate = clean(datum[1]);
+		this.owner = clean(datum[2]);
+		this.notes = clean(datum[3]);
 	}
 
 	private static void addVehicle(String data) {
@@ -28,27 +30,24 @@ public class Vehicle implements Comparable<Vehicle> {
 		String[] datum = data.split(",");
 		if (datum[0].equals("VIN NUMBER")) return;
 		Vehicle v;
-		if (datum.length == 3) {
-			v = new Vehicle(datum[0], datum[1], datum[2]);
-		} else {
+		if (datum.length != FIELDS) {
 			//The formatting of the file is broken, but we can't risk losing any data
 			Matcher m = dataPattern.matcher(data);
-			String vi = "???";
-			String en = "???";
-			String ow = "???";
+			datum = new String[FIELDS];
 			if (m.find()) {
-				vi = m.group(1);
-				en = m.group(2);
-				ow = m.group(3);
-				vi = fixEmpty(vi);
-				en = fixEmpty(en);
-				ow = fixEmpty(ow);
+				for (int i = 0; i < m.groupCount(); i++) {
+					datum[i] = m.group(i + 1);
+				}
 			}
-			v = new Vehicle(vi, en, ow);
 		}
+		v = new Vehicle(datum);
 		if (vehicles.add(v)) {
 			v.verifyData();
 		}
+	}
+
+	private static String clean(String s) {
+		return fixEmpty(s).toUpperCase().trim();
 	}
 
 	private static String fixEmpty(String s) {
@@ -69,7 +68,7 @@ public class Vehicle implements Comparable<Vehicle> {
 
 	@Override
 	public String toString() {
-		return String.format("%-17s,\t%-10s,\t%s\r\n", VIN, entryDate, owner);
+		return String.format("%-17s,\t%-10s,\t%-45s,\t%s\r\n", VIN, entryDate, owner, notes);
 	}
 
 	@Override
@@ -92,6 +91,10 @@ public class Vehicle implements Comparable<Vehicle> {
 				if (!owner.equals("???") ^ !v.owner.equals("???")) {
 					owner = owner.equals("???") ? v.owner : owner;
 					v.owner = v.owner.equals("???") ? owner : v.owner;
+				}
+				if (!notes.equals("???") ^ !v.notes.equals("???")) {
+					notes = notes.equals("???") ? v.notes : notes;
+					v.notes = v.notes.equals("???") ? notes : v.notes;
 				}
 				return true;
 			}
@@ -133,7 +136,7 @@ public class Vehicle implements Comparable<Vehicle> {
 				.replace("\"", "")
 				.replaceAll("\t", "")
 				.trim();
-		Matcher m = threeComma.matcher(s);
+		Matcher m = fourComma.matcher(s);
 		if (m.find()) {
 			s = m.group(1);
 		}
