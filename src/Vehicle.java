@@ -17,6 +17,7 @@ public class Vehicle implements Comparable<Vehicle> {
 	private static final Pattern fourComma = Pattern.compile("(^[^,]*,[^,]*,[^,]*,[^,]*)");
 	private static final Pattern dataPattern = Pattern.compile("(^[^,]+)?,([^,]*)?,([^,]*)?,([^,]*)?$");
 	private static final int FIELDS = 4;
+	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("mm/dd/yyyy");
 
 	private Vehicle(String[] datum) {
 		this.VIN = clean(datum[0]);
@@ -109,26 +110,22 @@ public class Vehicle implements Comparable<Vehicle> {
 
 	private void verifyData() {
 		String[] datum = new String[]{VIN, entryDate, owner};
-		try {
-			DateFormat df = new SimpleDateFormat("mm/dd/yyyy");
-			if (VIN.length() != 17)
-				addError("Incorrect VIN length (Expected 17, found " + VIN.length() + ")", datum);
-			if (owner.equals(""))
-				addError("Owner not specified", datum);
+		if (VIN.length() != 17)
+			addError("Incorrect VIN length (Expected 17, found " + VIN.length() + ")", datum);
+		if (owner.equals("???"))
+			addError("Owner not specified", datum);
+		if (!entryDate.equals("???")) {
 			try {
-				if (entryDate.equals("???")) {
-					Date d = df.parse(entryDate);
-					if (d.before(df.parse("1/1/2015")))
-						addError("Date is likely incorrect as it is before 2015", datum);
-				}
+				Date d = DATE_FORMAT.parse(entryDate);
+				if (d.before(DATE_FORMAT.parse("1/1/2013")))
+					addError("Date is likely incorrect as it is before 2013", datum);
+
 			} catch (ParseException e) {
 				addError("Date is incorrectly formatted", datum);
 			}
-		} catch (ArrayIndexOutOfBoundsException e) {
-			e.printStackTrace();
-			System.out.printf("%s,%s,%s", VIN, entryDate, owner);
+		}else{
+			addError("No entry date", datum);
 		}
-
 	}
 
 	private static String simplify(String s) {
@@ -170,13 +167,16 @@ public class Vehicle implements Comparable<Vehicle> {
 
 	@Override
 	public int compareTo(Vehicle o) {
-		if (entryDate.equals(o.entryDate)) {
-			if (owner.equals(o.owner)) {
-				return VIN.compareTo(o.VIN);
+		if (notes.equals("???") == o.notes.equals("???")) {
+			if (entryDate.equals(o.entryDate)) {
+				if (owner.equals(o.owner)) {
+					return VIN.compareTo(o.VIN);
+				}
+				return owner.compareTo(o.owner);
 			}
-			return owner.compareTo(o.owner);
+			return compareDateString(entryDate, o.entryDate);
 		}
-		return compareDateString(entryDate, o.entryDate);
+		return notes.compareTo(o.notes);
 	}
 
 	private int compareDateString(String s1, String s2) {
