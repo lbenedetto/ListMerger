@@ -77,37 +77,6 @@ public class Vehicle implements Comparable<Vehicle> {
 		return this.VIN.hashCode();
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof Vehicle) {
-			Vehicle v = (Vehicle) obj;
-			if (VIN.equals(v.VIN) &&
-					equalsIgnoreUnknown(entryDate, v.entryDate) &&
-					equalsIgnoreUnknown(owner, v.owner)) {
-				//Merge wildcard data
-				if (!entryDate.equals("???") ^ !v.entryDate.equals("???")) {
-					entryDate = entryDate.equals("???") ? v.entryDate : entryDate;
-					v.entryDate = v.entryDate.equals("???") ? entryDate : v.entryDate;
-				}
-				if (!owner.equals("???") ^ !v.owner.equals("???")) {
-					owner = owner.equals("???") ? v.owner : owner;
-					v.owner = v.owner.equals("???") ? owner : v.owner;
-				}
-				if (!notes.equals("???") ^ !v.notes.equals("???")) {
-					notes = notes.equals("???") ? v.notes : notes;
-					v.notes = v.notes.equals("???") ? notes : v.notes;
-				}
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private static boolean equalsIgnoreUnknown(String s1, String s2) {
-		//They are the same if either one is a wildcard
-		return s1.equals("???") || s2.equals("???") || s1.equals(s2);
-	}
-
 	private void verifyData() {
 		String[] datum = new String[]{VIN, entryDate, owner};
 		if (VIN.length() != 17)
@@ -123,7 +92,7 @@ public class Vehicle implements Comparable<Vehicle> {
 			} catch (ParseException e) {
 				addError("Date is incorrectly formatted", datum);
 			}
-		}else{
+		} else {
 			addError("No entry date", datum);
 		}
 	}
@@ -166,8 +135,40 @@ public class Vehicle implements Comparable<Vehicle> {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Vehicle) {
+			Vehicle v = (Vehicle) obj;
+			if (VIN.equals(v.VIN) &&
+					equalsIgnoreUnknown(entryDate, v.entryDate) &&
+					equalsIgnoreUnknown(owner, v.owner)) {
+				//Merge wildcard data
+				if (!entryDate.equals("???") ^ !v.entryDate.equals("???")) {
+					entryDate = entryDate.equals("???") ? v.entryDate : entryDate;
+					v.entryDate = v.entryDate.equals("???") ? entryDate : v.entryDate;
+				}
+				if (!owner.equals("???") ^ !v.owner.equals("???")) {
+					owner = owner.equals("???") ? v.owner : owner;
+					v.owner = v.owner.equals("???") ? owner : v.owner;
+				}
+				if (!notes.equals("???") ^ !v.notes.equals("???")) {
+					notes = notes.equals("???") ? v.notes : notes;
+					v.notes = v.notes.equals("???") ? notes : v.notes;
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean equalsIgnoreUnknown(String s1, String s2) {
+		//They are the same if either one is a wildcard
+		return s1.equals("???") || s2.equals("???") || s1.equals(s2);
+	}
+
+	@Override
 	public int compareTo(Vehicle o) {
-		if (notes.equals("???") == o.notes.equals("???")) {
+//		if (notes.equals("???") == o.notes.equals("???")) {
+		if(notes.equals(o.notes)){
 			if (entryDate.equals(o.entryDate)) {
 				if (owner.equals(o.owner)) {
 					return VIN.compareTo(o.VIN);
@@ -184,14 +185,8 @@ public class Vehicle implements Comparable<Vehicle> {
 			int[] is1 = Arrays.stream(s1.split("/")).mapToInt(x -> Integer.parseInt(x.trim())).toArray();
 			int[] is2 = Arrays.stream(s2.split("/")).mapToInt(x -> Integer.parseInt(x.trim())).toArray();
 			if (is1.length == 3 && is2.length == 3) {
-				int year = is1[2] - is2[2];
-				if (year == 0) {
-					int month = is1[0] - is2[0];
-					if (month == 0)
-						return is1[1] - is2[1];
-					return month;
-				}
-				return year;
+				return ((is1[2] * 100) + (is1[0] * 10) + is1[1]) -
+						((is2[2] * 100) + (is2[0] * 10) + is2[1]);
 			}
 		} catch (NumberFormatException e) {
 			System.out.println(s1 + ":::" + s2);
